@@ -20,6 +20,19 @@ function main(): void {
     console.error(`Could not copy POST.json from ${botDir}: ${(error as Error).message}`);
     process.exit(1);
   }
+  // The gate reads the copied file, so make sure it is a usable pointer to
+  // the post: valid JSON, an object, with a "url" string.
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(fs.readFileSync(destination, 'utf8'));
+  } catch (error) {
+    console.error(`Copied POST.json is not valid JSON: ${(error as Error).message}`);
+    process.exit(1);
+  }
+  if (typeof parsed !== 'object' || parsed === null || typeof (parsed as Record<string, unknown>).url !== 'string') {
+    console.error('Copied POST.json has no "url" string: the post address is missing');
+    process.exit(1);
+  }
 }
 
 main();
